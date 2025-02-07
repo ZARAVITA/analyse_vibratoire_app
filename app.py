@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Feb  7 18:13:56 2025
+
+@author: ZARAVITA Haydar
+"""
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,10 +13,17 @@ from scipy.signal import butter, filtfilt
 from scipy.fft import fft, fftfreq
 
 # Titre de l'application
-st.title("Analyse Vibratoire - Projet par Angelico et ZARAVITA")
 st.markdown("""
-Cette application permet d'analyser des signaux vibratoires en appliquant des filtres passe-haut, redressement, et filtre passe-bas.
-Vous pouvez importer un fichier CSV contenant les colonnes "time" et "amplitude", visualiser les données, et appliquer les traitements.
+Cette application est conçue pour l'analyse vibratoire de signaux. Elle permet :
+1. **Importation de données** : Chargez un fichier CSV contenant les colonnes "time" et "amplitude".
+2. **Visualisation des données** : Affichez les premières lignes du dataset et le signal original.
+3. **Traitement du signal** :
+   - Filtre passe-haut (fréquence de coupure réglable).
+   - Redressement du signal.
+   - Filtre passe-bas (fréquence de coupure réglable).
+4. **Affichage des résultats** : Visualisez le signal après traitement et son spectre FFT.
+
+Ce projet a été réalisé par **Angelico** et **ZARAVITA** dans le cadre de l'analyse vibratoire.
 """)
 
 # Upload du fichier CSV

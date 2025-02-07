@@ -23,7 +23,7 @@ Cette application est conçue pour l'analyse vibratoire de signaux. Elle permet 
    - Filtre passe-bas (fréquence de coupure réglable).
 4. **Affichage des résultats** : Visualisez le signal après traitement et son spectre FFT.
 
-Ce projet a été réalisé par **Angelico** et **ZARAVITA** dans le cadre de l'analyse vibratoire.
+Ce projet a été réalisé par **M. A Angelico** et **ZARAVITA** dans le cadre de l'analyse vibratoire.
 """)
 
 # Upload du fichier CSV

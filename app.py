@@ -58,7 +58,7 @@ if uploaded_file is not None:
 
     # Filtre passe-haut
     st.sidebar.header("Paramètres du filtre passe-haut")
-    freq_coupure_haut = st.sidebar.slider("Fréquence de coupure passe-haut (Hz)", min_value=1, max_value=1000, value=500)
+    freq_coupure_haut = st.sidebar.slider("Fréquence de coupure passe-haut (Hz)", min_value=1, max_value=5000, value=500)
 
     def filtre_pass_haut(data, freq_coupure_haut, freq_echantillonnage):
         freq_nyquist = 0.5 * freq_echantillonnage

@@ -120,7 +120,7 @@ if uploaded_file is not None:
         elif freq_limit=="n/20":
            f_limit=n//20 """
         #PARAMETRAGE DE FREQUENCE MAXIMALE
-        f_limit=n//8
+        f_limit=n//1000
         freq_limit = st.selectbox("Limite maximale de fréquence (n: longueur du signal traité) :", ["n","n/2", "n/4", "n/8","n/10", "n/12","n/16","n/20","n/100"])
         if freq_limit=="n":
            f_limit=n

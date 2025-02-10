@@ -102,7 +102,7 @@ if uploaded_file is not None:
         #PARAMETRAGE DE FREQUENCE MINIMALE
         f_min=1
         f_min = st.slider("Fréquence de coupure passe-haut (Hz)", min_value=0, max_value=n, value=500)
-       """
+        """
         freq_min = st.selectbox("Limite minimale de fréquence (n: longueur du signal traité) :", ["0","1", "n/200", "n/","n/10", "n/12","n/16","n/20","n/200"])
         if f_min=="0":
            f_min=0

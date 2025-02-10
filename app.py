@@ -100,7 +100,7 @@ if uploaded_file is not None:
     if st.checkbox("Afficher le spectre FFT du signal après traitement BLSD"):
         n = len(filtre_basse_du_signal_redresse)
         f_limit=n//8
-        freq_limit = st.selectbox("fréquence maximale :", ["n","n/2", "n/4", "n/8","n/10", "n/12","n/16","n/20"])
+        freq_limit = st.selectbox("fréquence maximale :", ["n","n/2", "n/4", "n/8","n/10", "n/12","n/16","n/20","n/100"])
         if freq_limit=="n":
            f_limit=n
         elif freq_limit=="n/2":
@@ -117,6 +117,8 @@ if uploaded_file is not None:
            f_limit=n//16
         elif freq_limit=="n/20":
            f_limit=n//20
+         elif freq_limit=="n/100":
+           f_limit=n//100
         valeur_fft = fft(filtre_basse_du_signal_redresse / 10000)
         frequencies = fftfreq(n, d=1/fs)[:f_limit]
         fft_magnitudes = np.abs(valeur_fft)[:f_limit]

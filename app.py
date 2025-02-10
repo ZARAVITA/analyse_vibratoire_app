@@ -34,7 +34,7 @@ if uploaded_file is not None:
     data = pd.read_csv(uploaded_file, sep=";", skiprows=1)
     
     # Conversion des colonnes en numpy arrays
-    time = data.iloc[:, 0].values # data.iloc[:, 0].values / 1000   si Conversion en secondes
+    time = data.iloc[:, 0].values / 1000 # data.iloc[:, 0].values / 1000   si Conversion en secondes
     amplitude = data.iloc[:, 1].values
 
     # Aperçu du dataset
@@ -44,7 +44,7 @@ if uploaded_file is not None:
     # Affichage du signal original
     if st.checkbox("Afficher le signal original (time vs amplitude)"):
         fig, ax = plt.subplots()
-        ax.plot(time, amplitude)
+        ax.plot(time*1000, amplitude)
         ax.set_xlabel("Time")
         ax.set_ylabel("Amplitude")
         ax.grid()

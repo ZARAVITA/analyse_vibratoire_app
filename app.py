@@ -117,7 +117,7 @@ if uploaded_file is not None:
            f_limit=n//16
         elif freq_limit=="n/20":
            f_limit=n//20
-         elif freq_limit=="n/100":
+        elif freq_limit=="n/100":
            f_limit=n//100
         valeur_fft = fft(filtre_basse_du_signal_redresse / 10000)
         frequencies = fftfreq(n, d=1/fs)[:f_limit]

@@ -100,7 +100,7 @@ if uploaded_file is not None:
     if st.checkbox("Afficher le spectre FFT du signal après traitement BLSD"):
         n = len(filtre_basse_du_signal_redresse)
         #PARAMETRAGE DE FREQUENCE MINIMALE
-        f_min=n//8
+        f_min=n//100
         """
         freq_limit = st.selectbox("Limite minimale de fréquence (n: longueur du signal traité) :", ["n","n/2", "n/4", "n/8","n/10", "n/12","n/16","n/20","n/100"])
         if freq_limit=="n":
@@ -120,7 +120,7 @@ if uploaded_file is not None:
         elif freq_limit=="n/20":
            f_limit=n//20 """
         #PARAMETRAGE DE FREQUENCE MAXIMALE
-        f_limit=n//1000
+        f_limit=n//8
         freq_limit = st.selectbox("Limite maximale de fréquence (n: longueur du signal traité) :", ["n","n/2", "n/4", "n/8","n/10", "n/12","n/16","n/20","n/100"])
         if freq_limit=="n":
            f_limit=n

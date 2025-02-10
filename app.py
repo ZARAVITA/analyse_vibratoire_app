@@ -101,7 +101,7 @@ if uploaded_file is not None:
         n = len(filtre_basse_du_signal_redresse)
         #PARAMETRAGE DE FREQUENCE MINIMALE
         f_min=1
-        f_min = st.slider("Limite minimale de fréquence (Hz)", min_value=0, max_value=n-10, value=500)
+        f_min = st.slider("Limite minimale de fréquence (Hz)", min_value=0, max_value=n//2, value=500)
         
         #PARAMETRAGE DE FREQUENCE MAXIMALE
         f_limit= st.slider("Limite maximale de fréquence (Hz)", min_value=n//1000, max_value=n//2, value=500)

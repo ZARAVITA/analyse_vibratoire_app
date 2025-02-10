@@ -99,13 +99,31 @@ if uploaded_file is not None:
     # Spectre FFT du signal après traitement
     if st.checkbox("Afficher le spectre FFT du signal après traitement BLSD"):
         n = len(filtre_basse_du_signal_redresse)
+        f_limit=n//8
+        freq_limit = st.selectbox("fréquence maximale :", ["n","n/2", "n/4", "n/8","n/10", "n/12","n/16","n/20"])
+        if freq_limit=="n":
+           f_limit=n
+        elif freq_limit=="n/2":
+           f_limit=n//2
+        elif freq_limit=="n/4":
+           f_limit=n//4
+        elif freq_limit=="n/8":
+           f_limit=n//8
+        elif freq_limit=="n/10":
+           f_limit=n//10
+        elif freq_limit=="n/12":
+           f_limit=n//12
+        elif freq_limit=="n/16":
+           f_limit=n//16
+        elif freq_limit=="n/20":
+           f_limit=n//20
         valeur_fft = fft(filtre_basse_du_signal_redresse / 10000)
-        frequencies = fftfreq(n, d=1/fs)[:n//8]
-        fft_magnitudes = np.abs(valeur_fft)[:n//8]
+        frequencies = fftfreq(n, d=1/fs)[:f_limit]
+        fft_magnitudes = np.abs(valeur_fft)[:f_limit]
 
         fig, ax = plt.subplots(figsize=(10, 4))
         ax.plot(frequencies, fft_magnitudes, label='Spectre FFT')
-        ax.set_title('Spectre FFT du Signal après Traitement')
+        ax.set_title('Spectre FFT du Signal après Traitement BLSD')
         ax.set_xlabel('Fréquence (Hz)')
         ax.set_ylabel('Amplitude')
         ax.grid()

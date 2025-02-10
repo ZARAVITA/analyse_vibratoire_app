@@ -17,7 +17,7 @@ st.markdown("""
 Cette application est conçue pour l'analyse vibratoire de signaux. Elle permet :
 1. **Importation de données** : Chargez un fichier CSV contenant les colonnes "time" et "amplitude".
 2. **Visualisation des données** : Affichez les premières lignes du dataset et le signal original.
-3. **Traitement du signal** :
+3. **Traitement BLSD (Bearing Low Speed Detection) du signal** :
    - Filtre passe-haut (fréquence de coupure réglable).
    - Redressement du signal.
    - Filtre passe-bas (fréquence de coupure réglable).

@@ -99,8 +99,29 @@ if uploaded_file is not None:
     # Spectre FFT du signal après traitement
     if st.checkbox("Afficher le spectre FFT du signal après traitement BLSD"):
         n = len(filtre_basse_du_signal_redresse)
+        #PARAMETRAGE DE FREQUENCE MINIMALE
+        f_min=0
+        """
+        freq_limit = st.selectbox("Limite minimale de fréquence maximale (n: longueur du signal traité) :", ["n","n/2", "n/4", "n/8","n/10", "n/12","n/16","n/20","n/100"])
+        if freq_limit=="n":
+           f_limit=n
+        elif freq_limit=="n/2":
+           f_limit=n//2
+        elif freq_limit=="n/4":
+           f_limit=n//4
+        elif freq_limit=="n/8":
+           f_limit=n//8
+        elif freq_limit=="n/10":
+           f_limit=n//10
+        elif freq_limit=="n/12":
+           f_limit=n//12
+        elif freq_limit=="n/16":
+           f_limit=n//16
+        elif freq_limit=="n/20":
+           f_limit=n//20 """
+        #PARAMETRAGE DE FREQUENCE MAXIMALE
         f_limit=n//8
-        freq_limit = st.selectbox("fréquence maximale :", ["n","n/2", "n/4", "n/8","n/10", "n/12","n/16","n/20","n/100"])
+        freq_limit = st.selectbox("Limite maximale de fréquence (n: longueur du signal traité) :", ["n","n/2", "n/4", "n/8","n/10", "n/12","n/16","n/20","n/100"])
         if freq_limit=="n":
            f_limit=n
         elif freq_limit=="n/2":
@@ -120,8 +141,8 @@ if uploaded_file is not None:
         elif freq_limit=="n/100":
            f_limit=n//100
         valeur_fft = fft(filtre_basse_du_signal_redresse / 10000)
-        frequencies = fftfreq(n, d=1/fs)[1:f_limit]
-        fft_magnitudes = np.abs(valeur_fft)[1:f_limit]
+        frequencies = fftfreq(n, d=1/fs)[0.1:f_limit]
+        fft_magnitudes = np.abs(valeur_fft)[0.1:f_limit]
 
         fig, ax = plt.subplots(figsize=(10, 4))
         ax.plot(frequencies, fft_magnitudes, label='Spectre FFT')

@@ -100,7 +100,7 @@ if uploaded_file is not None:
     if st.checkbox("Afficher le spectre FFT du signal après traitement BLSD"):
         n = len(filtre_basse_du_signal_redresse)
         #PARAMETRAGE DE FREQUENCE MINIMALE
-        f_min = st.slider("Cat off [fréquence (Hz)]", min_value=0, max_value=n//2, value=500)
+        f_min = st.slider("Zoom sur cat off [fréquence (Hz)]", min_value=0, max_value=n//2, value=500)
         st.markdown("""
 **NB**: la fréquence minimale doit être inférieure à celle maximale.
 """)

@@ -105,7 +105,7 @@ if uploaded_file is not None:
 **NB**: la fréquence minimale doit être inférieure à celle maximale.
 """)
         #PARAMETRAGE DE FREQUENCE MAXIMALE
-        f_limit= st.slider("Limite maximale de fréquence (Hz)", min_value=n//1000, max_value=n//2, value=500)
+        f_limit= st.slider("Zoom sur  fréquence maximale (Hz)", min_value=n//1000, max_value=n//2, value=500)
         valeur_fft = fft(filtre_basse_du_signal_redresse / 10000)
         frequencies = fftfreq(n, d=1/fs)[f_min:f_limit]
         fft_magnitudes = np.abs(valeur_fft)[f_min:f_limit]

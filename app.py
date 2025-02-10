@@ -102,24 +102,7 @@ if uploaded_file is not None:
         #PARAMETRAGE DE FREQUENCE MINIMALE
         f_min=1
         f_min = st.slider("Limite minimale de fréquence (Hz)", min_value=0, max_value=n-10, value=500)
-        """
-        freq_min = st.selectbox("Limite minimale de fréquence (n: longueur du signal traité) :", ["0","1", "n/200", "n/","n/10", "n/12","n/16","n/20","n/200"])
-        if f_min=="0":
-           f_min=0
-        elif f_limit=="1":
-           f_min=1
-        elif freq_limit=="n/4":
-           f_limit=n//4
-        elif freq_limit=="n/8":
-           f_limit=n//8
-        elif freq_limit=="n/10":
-           f_limit=n//10
-        elif freq_limit=="n/12":
-           f_limit=n//12
-        elif freq_limit=="n/16":
-           f_limit=n//16
-        elif freq_limit=="n/20":
-           f_limit=n//20 """
+        
         #PARAMETRAGE DE FREQUENCE MAXIMALE
         f_limit=n//8
         freq_limit = st.selectbox("Limite maximale de fréquence (n: longueur du signal traité) :", ["n","n/2", "n/4", "n/8","n/10", "n/12","n/16","n/20","n/100"])
@@ -141,6 +124,7 @@ if uploaded_file is not None:
            f_limit=n//20
         elif freq_limit=="n/100":
            f_limit=n//100
+        f_limit= st.slider("Limite maximale de fréquence (Hz)", min_value=100, max_value=n, value=500)
         valeur_fft = fft(filtre_basse_du_signal_redresse / 10000)
         frequencies = fftfreq(n, d=1/fs)[f_min:f_limit]
         fft_magnitudes = np.abs(valeur_fft)[f_min:f_limit]

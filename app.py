@@ -120,8 +120,8 @@ if uploaded_file is not None:
         elif freq_limit=="n/100":
            f_limit=n//100
         valeur_fft = fft(filtre_basse_du_signal_redresse / 10000)
-        frequencies = fftfreq(n, d=1/fs)[:f_limit]
-        fft_magnitudes = np.abs(valeur_fft)[:f_limit]
+        frequencies = fftfreq(n, d=1/fs)[1:f_limit]
+        fft_magnitudes = np.abs(valeur_fft)[1:f_limit]
 
         fig, ax = plt.subplots(figsize=(10, 4))
         ax.plot(frequencies, fft_magnitudes, label='Spectre FFT')

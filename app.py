@@ -100,9 +100,10 @@ if uploaded_file is not None:
     if st.checkbox("Afficher le spectre FFT du signal après traitement BLSD"):
         n = len(filtre_basse_du_signal_redresse)
         #PARAMETRAGE DE FREQUENCE MINIMALE
-        f_min=1
         f_min = st.slider("Limite minimale de fréquence (Hz)", min_value=0, max_value=n//2, value=500)
-        
+        st.markdown("""
+**NB**: la fréquence minimale doit être inférieure à celle maximale.
+""")
         #PARAMETRAGE DE FREQUENCE MAXIMALE
         f_limit= st.slider("Limite maximale de fréquence (Hz)", min_value=n//1000, max_value=n//2, value=500)
         valeur_fft = fft(filtre_basse_du_signal_redresse / 10000)

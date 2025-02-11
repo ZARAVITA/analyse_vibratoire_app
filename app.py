@@ -32,8 +32,23 @@ uploaded_file = st.file_uploader("Importez votre fichier CSV", type=["csv"])
 if uploaded_file is not None:
     # Lecture du fichier CSV
     data = pd.read_csv(uploaded_file, sep=";", skiprows=1)
-    time = data.iloc[:, 0].values / 1000
+    # Conversion des colonnes en numpy arrays
+    time = data.iloc[:, 0].values / 1000 # data.iloc[:, 0].values / 1000   si Conversion en secondes
     amplitude = data.iloc[:, 1].values
+
+    # Aperçu du dataset
+    if st.checkbox("Afficher les 5 premières lignes du dataset"):
+        st.write(data.head())
+
+    # Affichage du signal original
+    if st.checkbox("Afficher le signal original (time vs amplitude)"):
+        fig, ax = plt.subplots()
+        ax.plot(time*1000, amplitude)
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Amplitude")
+        ax.grid()
+        ax.set_title("Signal Original")
+        st.pyplot(fig)
 
     # Fréquence d'échantillonnage
     dt = np.diff(time)

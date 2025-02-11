@@ -78,6 +78,15 @@ if uploaded_file is not None:
         return filtfilt(b, a, data)
     
     signal_filtre = filtre_passe_bas(signal_redresse, freq_coupure_bas, fs)
+    # Affichage du signal après traitement
+    if st.checkbox("Afficher le signal après traitement BLSD(Bearing Low Speed Detection)"):
+        fig, ax = plt.subplots()
+        ax.plot(time, signal_filtre)
+        ax.set_xlabel("Time (s)")
+        ax.set_ylabel("Amplitude")
+        ax.grid()
+        ax.set_title("Signal après traitement (passe-haut, redressement, passe-bas)")
+        st.pyplot(fig)
     
     # Affichage du spectre FFT interactif
     if st.checkbox("Afficher le spectre FFT du signal après traitement BLSD"):

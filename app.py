@@ -59,7 +59,7 @@ if uploaded_file is not None:
         n = len(signal_filtre)
         f_min = st.slider("Zoom sur fréquence minimale (Hz)", 0, n//2, 500)
         f_limit = st.slider("Zoom sur fréquence maximale (Hz)", n//1000, n//2, 500)
-        valeur_fft = fft(signal_filtre / 10000)
+        valeur_fft = fft(signal_filtre)
         frequencies = fftfreq(n, d=1/fs)[f_min:f_limit]
         fft_magnitudes = np.abs(valeur_fft)[f_min:f_limit]
         

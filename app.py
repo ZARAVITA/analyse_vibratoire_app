@@ -14,7 +14,16 @@ from scipy.fft import fft, fftfreq
 
 # Titre de l'application
 st.markdown("""
-Cette application est conçue pour l'analyse vibratoire de signaux.
+Cette application est conçue pour l'analyse vibratoire de signaux. Elle permet :
+1. **Importation de données** : Chargez un fichier CSV contenant les colonnes "time" et "amplitude".
+2. **Visualisation des données** : Affichez les premières lignes du dataset et le signal original.
+3. **Traitement BLSD (Bearing Low Speed Detection) du signal** :
+   - Filtre passe-haut (fréquence de coupure réglable).
+   - Redressement du signal.
+   - Filtre passe-bas (fréquence de coupure réglable).
+4. **Affichage des résultats** : Visualisez le signal après traitement et son spectre FFT.
+
+Ce projet a été réalisé par **M. A Angelico** et **ZARAVITA** dans le cadre de l'analyse vibratoire.
 """)
 
 # Upload du fichier CSV

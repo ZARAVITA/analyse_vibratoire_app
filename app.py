@@ -8,6 +8,7 @@ Created on Fri Feb  7 18:13:56 2025
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from scipy.signal import butter, filtfilt
 from scipy.fft import fft, fftfreq

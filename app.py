@@ -218,13 +218,13 @@ if uploaded_file is not None:
                         text=f'H{i}',
                         textposition='top center',
                         name=f'Harmonique {i}',
-                        hovertemplate=f'H{i}: {freq_harm:.1f} Hz<br>Amplitude: {amp_harm:.1f}<extra></extra>'
+                        hovertemplate=f'H{i}: {freq_harm:.1f} Hz<br>Amplitude: {amp_harm:.2f}<extra></extra>'
                     ))
                     
                     fft_fig.add_annotation(
                         x=freq_harm,
                         y=amp_harm,
-                        text=f'({freq_harm:.1f} Hz, {amp_harm:.1f})',
+                        text=f'({freq_harm:.1f} Hz, {amp_harm:.2f})',
                         showarrow=True,
                         arrowhead=1,
                         ax=0,
@@ -345,7 +345,7 @@ if uploaded_file is not None:
                 harmonics_data.append({
                     'Harmonique': f'H{i}',
                     'Fréquence (Hz)': f'{harmonic_freq:.1f}',
-                    'Amplitude': f'{harmonic_amp:.1f}'
+                    'Amplitude': f'{harmonic_amp:.2f}'
                 })
                 
                 # Ajouter le point et l'annotation
@@ -357,7 +357,7 @@ if uploaded_file is not None:
                     text=f'H{i}',
                     textposition='top center',
                     name=f'Harmonique {i}',
-                    hovertemplate=f'H{i}<br>Fréquence: {harmonic_freq:.1f} Hz<br>Amplitude: {harmonic_amp:.1f}<extra></extra>'
+                    hovertemplate=f'H{i}<br>Fréquence: {harmonic_freq:.1f} Hz<br>Amplitude: {harmonic_amp:.2f}<extra></extra>'
                 ))
                 
                 # Ajouter une annotation avec les coordonnées exactes

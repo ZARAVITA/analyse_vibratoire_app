@@ -8,7 +8,6 @@ Created on Fri Feb  7 18:13:56 2025
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from scipy.signal import butter, filtfilt
 from scipy.fft import fft, fftfreq
@@ -65,12 +64,6 @@ if uploaded_file is not None:
             yaxis_title='Amplitude',
             hovermode='x unified',
             clickmode='event+select'
-        )
-        
-        # Configuration pour la sélection de points
-        fig.update_layout(
-            dragmode='select',
-            selectdirection='h'
         )
         
         st.plotly_chart(fig)
@@ -145,12 +138,6 @@ if uploaded_file is not None:
             clickmode='event+select'
         )
         
-        # Configuration pour la sélection de points
-        fig.update_layout(
-            dragmode='select',
-            selectdirection='h'
-        )
-        
         st.plotly_chart(fig)
     
     # Affichage du spectre FFT interactif
@@ -171,25 +158,6 @@ if uploaded_file is not None:
             hovertemplate='Freq: %{x:.1f} Hz<br>Amplitude: %{y:.1f}<extra></extra>'
         ))
         
-        # Variables pour stocker les clics
-        clicked_points = []
-        
-        # Fonction pour ajouter les harmoniques
-        def add_harmonics(fig, fundamental_freq):
-            for i in range(1, 6):  # 5 harmoniques
-                freq = i * fundamental_freq
-                idx = np.abs(frequencies - freq).argmin()
-                fig.add_trace(go.Scatter(
-                    x=[frequencies[idx]],
-                    y=[fft_magnitudes[idx]],
-                    mode='markers+text',
-                    marker=dict(size=10, color='red'),
-                    text=f'H{i}',
-                    textposition='top center',
-                    name=f'Harmonique {i}',
-                    hovertemplate=f'H{i}: {frequencies[idx]:.1f} Hz<br>Amplitude: {fft_magnitudes[idx]:.1f}<extra></extra>'
-                ))
-        
         # Configuration de l'interactivité
         fig.update_layout(
             title='Spectre FFT du Signal après Traitement BLSD',
@@ -199,29 +167,22 @@ if uploaded_file is not None:
             clickmode='event+select'
         )
         
-        # Configuration pour la sélection de points
-        fig.update_layout(
-            dragmode='select',
-            selectdirection='h'
-        )
-        
-        # Affichage du graphique
         st.plotly_chart(fig, config={'displayModeBar': True})
         
-        # Gestion des événements de clic
-        if st.checkbox("Activer la sélection d'harmoniques (double-cliquez sur le graphique)"):
-            st.info("Double-cliquez sur une fréquence fondamentale pour afficher ses harmoniques")
-            
-            # Cette partie nécessiterait normalement une intégration avec JavaScript
-            # Pour Streamlit, nous utilisons une approche simplifiée avec des sliders
-            fundamental_freq = st.slider("Sélectionnez la fréquence fondamentale pour afficher ses harmoniques", 
-                                       min_value=float(f_min), 
-                                       max_value=float(f_limit), 
-                                       value=float(f_min))
-            
-            # Recréer la figure avec les harmoniques
-            fig_with_harmonics = go.Figure()
-            fig_with_harmonics.add_trace(go.Scatter(
+        # Section pour afficher les harmoniques avec leurs coordonnées
+        st.subheader("Analyse des harmoniques")
+        fundamental_freq = st.slider(
+            "Sélectionnez la fréquence fondamentale pour afficher ses harmoniques", 
+            min_value=float(f_min), 
+            max_value=float(f_limit), 
+            value=float(f_min),
+            step=0.1
+        )
+        
+        if fundamental_freq > 0:
+            # Créer une nouvelle figure avec les harmoniques
+            fig_harmonics = go.Figure()
+            fig_harmonics.add_trace(go.Scatter(
                 x=frequencies,
                 y=fft_magnitudes,
                 mode='lines',
@@ -229,25 +190,69 @@ if uploaded_file is not None:
                 hovertemplate='Freq: %{x:.1f} Hz<br>Amplitude: %{y:.1f}<extra></extra>'
             ))
             
-            add_harmonics(fig_with_harmonics, fundamental_freq)
+            # Ajouter les harmoniques avec annotations
+            harmonics_data = []
+            for i in range(1, 6):  # 5 harmoniques
+                freq = i * fundamental_freq
+                # Trouver l'index le plus proche de la fréquence harmonique
+                idx = np.abs(frequencies - freq).argmin()
+                harmonic_freq = frequencies[idx]
+                harmonic_amp = fft_magnitudes[idx]
+                
+                # Stocker les données pour le tableau
+                harmonics_data.append({
+                    'Harmonique': f'H{i}',
+                    'Fréquence (Hz)': f'{harmonic_freq:.1f}',
+                    'Amplitude': f'{harmonic_amp:.1f}'
+                })
+                
+                # Ajouter le point et l'annotation
+                fig_harmonics.add_trace(go.Scatter(
+                    x=[harmonic_freq],
+                    y=[harmonic_amp],
+                    mode='markers+text',
+                    marker=dict(size=10, color='red'),
+                    text=f'H{i}',
+                    textposition='top center',
+                    name=f'Harmonique {i}',
+                    hovertemplate=f'H{i}<br>Fréquence: {harmonic_freq:.1f} Hz<br>Amplitude: {harmonic_amp:.1f}<extra></extra>'
+                ))
+                
+                # Ajouter une annotation avec les coordonnées exactes
+                fig_harmonics.add_annotation(
+                    x=harmonic_freq,
+                    y=harmonic_amp,
+                    text=f'({harmonic_freq:.1f} Hz, {harmonic_amp:.1f})',
+                    showarrow=True,
+                    arrowhead=1,
+                    ax=0,
+                    ay=-30,
+                    font=dict(color='red')
+                )
             
             # Mise à jour de la mise en page
-            fig_with_harmonics.update_layout(
-                title='Spectre FFT avec Harmoniques',
+            fig_harmonics.update_layout(
+                title=f'Spectre FFT avec Harmoniques de {fundamental_freq:.1f} Hz',
                 xaxis_title='Fréquence (Hz)',
                 yaxis_title='Amplitude',
-                hovermode='x unified'
+                hovermode='x unified',
+                showlegend=False
             )
             
-            st.plotly_chart(fig_with_harmonics)
+            st.plotly_chart(fig_harmonics)
+            
+            # Afficher un tableau récapitulatif des harmoniques
+            st.write("Détails des harmoniques:")
+            harmonics_df = pd.DataFrame(harmonics_data)
+            st.table(harmonics_df)
         
         # Calcul de fréquence entre deux points sélectionnés
         st.subheader("Mesure de fréquence entre deux points")
         col1, col2 = st.columns(2)
         with col1:
-            t1 = st.number_input("Temps du premier point (s)", value=0.0, step=0.1)
+            t1 = st.number_input("Temps du premier point (s)", value=0.0, step=0.1, format="%.1f")
         with col2:
-            t2 = st.number_input("Temps du deuxième point (s)", value=0.0, step=0.1)
+            t2 = st.number_input("Temps du deuxième point (s)", value=0.0, step=0.1, format="%.1f")
         
         if t1 != 0 and t2 != 0 and t1 != t2:
             delta_t = abs(t1 - t2)

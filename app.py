@@ -196,6 +196,42 @@ if uploaded_file is not None:
             hovertemplate='Freq: %{x:.1f} Hz<br>Amplitude: %{y:.1f}<extra></extra>'
         ))
         
+        # Ajout des harmoniques si une fréquence est sélectionnée
+        if st.checkbox("Afficher les harmoniques sur la FFT originale"):
+            freq_fond = st.number_input("Fréquence fondamentale (Hz)", 
+                                      min_value=0.1, 
+                                      max_value=float(xf.max()), 
+                                      value=10.0, step=0.1)
+            
+            if freq_fond > 0:
+                for i in range(1, 6):  # 5 harmoniques
+                    freq = i * freq_fond
+                    idx = np.abs(xf - freq).argmin()
+                    freq_harm = xf[idx]
+                    amp_harm = yf[idx]
+                    
+                    fft_fig.add_trace(go.Scatter(
+                        x=[freq_harm],
+                        y=[amp_harm],
+                        mode='markers+text',
+                        marker=dict(size=10, color='red'),
+                        text=f'H{i}',
+                        textposition='top center',
+                        name=f'Harmonique {i}',
+                        hovertemplate=f'H{i}: {freq_harm:.1f} Hz<br>Amplitude: {amp_harm:.1f}<extra></extra>'
+                    ))
+                    
+                    fft_fig.add_annotation(
+                        x=freq_harm,
+                        y=amp_harm,
+                        text=f'({freq_harm:.1f} Hz, {amp_harm:.1f})',
+                        showarrow=True,
+                        arrowhead=1,
+                        ax=0,
+                        ay=-30,
+                        font=dict(color='red')
+                    )
+        
         fft_fig.update_layout(
             title='Spectre FFT du Signal Original',
             xaxis_title='Fréquence (Hz)',
@@ -287,18 +323,7 @@ if uploaded_file is not None:
             hovertemplate='Freq: %{x:.1f} Hz<br>Amplitude: %{y:.1f}<extra></extra>'
         ))
         
-        # Configuration de l'interactivité
-        fig.update_layout(
-            title='Spectre FFT du Signal après Traitement BLSD',
-            xaxis_title='Fréquence (Hz)',
-            yaxis_title='Amplitude',
-            hovermode='x unified',
-            clickmode='event+select'
-        )
-        
-        st.plotly_chart(fig, config={'displayModeBar': True})
-        
-        # Section pour afficher les harmoniques avec leurs coordonnées
+        # Ajout des harmoniques
         st.subheader("Analyse des harmoniques")
         fundamental_freq = st.slider(
             "Sélectionnez la fréquence fondamentale pour afficher ses harmoniques", 
@@ -309,21 +334,9 @@ if uploaded_file is not None:
         )
         
         if fundamental_freq > 0:
-            # Créer une nouvelle figure avec les harmoniques
-            fig_harmonics = go.Figure()
-            fig_harmonics.add_trace(go.Scatter(
-                x=frequencies,
-                y=fft_magnitudes,
-                mode='lines',
-                name='Spectre FFT',
-                hovertemplate='Freq: %{x:.1f} Hz<br>Amplitude: %{y:.1f}<extra></extra>'
-            ))
-            
-            # Ajouter les harmoniques avec annotations
             harmonics_data = []
             for i in range(1, 6):  # 5 harmoniques
                 freq = i * fundamental_freq
-                # Trouver l'index le plus proche de la fréquence harmonique
                 idx = np.abs(frequencies - freq).argmin()
                 harmonic_freq = frequencies[idx]
                 harmonic_amp = fft_magnitudes[idx]
@@ -336,7 +349,7 @@ if uploaded_file is not None:
                 })
                 
                 # Ajouter le point et l'annotation
-                fig_harmonics.add_trace(go.Scatter(
+                fig.add_trace(go.Scatter(
                     x=[harmonic_freq],
                     y=[harmonic_amp],
                     mode='markers+text',
@@ -348,7 +361,7 @@ if uploaded_file is not None:
                 ))
                 
                 # Ajouter une annotation avec les coordonnées exactes
-                fig_harmonics.add_annotation(
+                fig.add_annotation(
                     x=harmonic_freq,
                     y=harmonic_amp,
                     text=f'({harmonic_freq:.1f} Hz, {harmonic_amp:.1f})',
@@ -359,13 +372,20 @@ if uploaded_file is not None:
                     font=dict(color='red')
                 )
             
-            # Mise à jour de la mise en page
-            fig_harmonics.update_layout(
-                title=f'Spectre FFT avec Harmoniques de {fundamental_freq:.1f} Hz',
-                xaxis_title='Fréquence (Hz)',
-                yaxis_title='Amplitude',
-                hovermode='x unified',
-                showlegend=False
-            )
-            
-            st.plotly_ch
+            # Afficher un tableau récapitulatif des harmoniques
+            st.write("Détails des harmoniques:")
+            harmonics_df = pd.DataFrame(harmonics_data)
+            st.table(harmonics_df)
+        
+        # Configuration de l'interactivité
+        fig.update_layout(
+            title='Spectre FFT du Signal après Traitement BLSD',
+            xaxis_title='Fréquence (Hz)',
+            yaxis_title='Amplitude',
+            hovermode='x unified',
+            clickmode='event+select'
+        )
+        
+        st.plotly_chart(fig, config={'displayModeBar': True})
+else:
+    st.info("Veuillez importer un fichier CSV pour commencer l'analyse.")

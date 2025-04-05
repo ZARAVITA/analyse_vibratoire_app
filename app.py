@@ -161,33 +161,27 @@ if uploaded_file is not None:
         )
         
         # Affichage du graphique
-        selected_point = st.plotly_chart(
+        st.plotly_chart(
             fig_original, 
             config={'displayModeBar': True, 'scrollZoom': True},
             key='original_signal'
         )
         
-        # Bouton pour réinitialiser la sélection
-        if st.button('Réinitialiser la sélection pour le signal original'):
-            st.session_state.selected_points = {'t1': None, 't2': None, 'fig': None}
-            st.experimental_rerun()
+        # Boutons pour sélection manuelle des points
+        col1, col2 = st.columns(2)
+        with col1:
+            t1 = st.number_input("Sélectionnez T1 (s)", min_value=float(time.min()), 
+                                max_value=float(time.max()), value=0.0, step=0.001)
+        with col2:
+            t2 = st.number_input("Sélectionnez T2 (s)", min_value=float(time.min()), 
+                                max_value=float(time.max()), value=0.0, step=0.001)
         
-        # Gestion de la sélection de points via un clic
-        if st.session_state.get('click_data'):
-            point_data = st.session_state.click_data['points'][0]
-            x_clicked = point_data['x']
-            
-            if st.session_state.selected_points['fig'] != 'Signal Original':
-                st.session_state.selected_points = {'t1': x_clicked, 't2': None, 'fig': 'Signal Original'}
-            else:
-                if st.session_state.selected_points['t1'] is None:
-                    st.session_state.selected_points['t1'] = x_clicked
-                else:
-                    st.session_state.selected_points['t2'] = x_clicked
-            
-            # Réinitialiser les données de clic après traitement
-            st.session_state.click_data = None
-            st.experimental_rerun()
+        if t1 != 0 or t2 != 0:
+            st.session_state.selected_points = {'t1': t1, 't2': t2, 'fig': 'Signal Original'}
+            if t1 != 0 and t2 != 0 and t1 != t2:
+                delta_t = abs(t2 - t1)
+                frequency = 1 / delta_t
+                st.success(f"Fréquence calculée: {frequency:.2f} Hz")
         
         # Calcul et affichage de la FFT du signal original
         st.subheader("FFT du signal original")
@@ -249,33 +243,31 @@ if uploaded_file is not None:
         )
         
         # Affichage du graphique
-        selected_point_treated = st.plotly_chart(
+        st.plotly_chart(
             fig_treated, 
             config={'displayModeBar': True, 'scrollZoom': True},
             key='treated_signal'
         )
         
-        # Bouton pour réinitialiser la sélection
-        if st.button('Réinitialiser la sélection pour le signal traité'):
-            st.session_state.selected_points = {'t1': None, 't2': None, 'fig': None}
-            st.experimental_rerun()
+        # Boutons pour sélection manuelle des points
+        col1, col2 = st.columns(2)
+        with col1:
+            t1_treated = st.number_input("Sélectionnez T1 (s) - Signal traité", 
+                                       min_value=float(time.min()), 
+                                       max_value=float(time.max()), 
+                                       value=0.0, step=0.001)
+        with col2:
+            t2_treated = st.number_input("Sélectionnez T2 (s) - Signal traité", 
+                                       min_value=float(time.min()), 
+                                       max_value=float(time.max()), 
+                                       value=0.0, step=0.001)
         
-        # Gestion de la sélection de points via un clic
-        if st.session_state.get('click_data_treated'):
-            point_data = st.session_state.click_data_treated['points'][0]
-            x_clicked = point_data['x']
-            
-            if st.session_state.selected_points['fig'] != 'Signal traité':
-                st.session_state.selected_points = {'t1': x_clicked, 't2': None, 'fig': 'Signal traité'}
-            else:
-                if st.session_state.selected_points['t1'] is None:
-                    st.session_state.selected_points['t1'] = x_clicked
-                else:
-                    st.session_state.selected_points['t2'] = x_clicked
-            
-            # Réinitialiser les données de clic après traitement
-            st.session_state.click_data_treated = None
-            st.experimental_rerun()
+        if t1_treated != 0 or t2_treated != 0:
+            st.session_state.selected_points = {'t1': t1_treated, 't2': t2_treated, 'fig': 'Signal traité'}
+            if t1_treated != 0 and t2_treated != 0 and t1_treated != t2_treated:
+                delta_t = abs(t2_treated - t1_treated)
+                frequency = 1 / delta_t
+                st.success(f"Fréquence calculée: {frequency:.2f} Hz")
     
     # Affichage du spectre FFT interactif
     if st.checkbox("Afficher le spectre FFT du signal après traitement BLSD"):
@@ -376,11 +368,4 @@ if uploaded_file is not None:
                 showlegend=False
             )
             
-            st.plotly_chart(fig_harmonics)
-            
-            # Afficher un tableau récapitulatif des harmoniques
-            st.write("Détails des harmoniques:")
-            harmonics_df = pd.DataFrame(harmonics_data)
-            st.table(harmonics_df)
-else:
-    st.info("Veuillez importer un fichier CSV pour commencer l'analyse.")
+            st.plotly_ch

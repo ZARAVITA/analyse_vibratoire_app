@@ -79,10 +79,12 @@ selected_roller_count = bearing_data[
 st.sidebar.info(f"Nombre de rouleaux: {selected_roller_count}")
 
 # Vitesse de rotation en RPM
-rotation_speed_rpm = st.sidebar.number_input("Vitesse de rotation (RPM)", 
-                                           min_value=1, 
-                                           max_value=10000, 
-                                           value=1000)
+rotation_speed_hz = st.sidebar.number_input("Vitesse de rotation (Hz)", 
+                                         min_value=0.1, 
+                                         max_value=1000.0, 
+                                         value=16.67,  # 1000 RPM ≈ 16.67 Hz
+                                         step=0.1,
+                                         format="%.2f")
 
 # Calcul des fréquences caractéristiques
 selected_bearing = bearing_data[
@@ -90,7 +92,7 @@ selected_bearing = bearing_data[
     (bearing_data['Name'] == selected_model)
 ].iloc[0]
 
-rotation_speed_hz = rotation_speed_rpm / 60  # Conversion RPM -> Hz
+rotation_speed_hz = rotation_speed_rpm  # 
 
 # Calcul des fréquences caractéristiques
 ftf_freq = selected_bearing['FTF'] * rotation_speed_hz

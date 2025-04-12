@@ -78,7 +78,7 @@ selected_roller_count = bearing_data[
 
 st.sidebar.info(f"Nombre de rouleaux: {selected_roller_count}")
 
-# Vitesse de rotation en RPM
+# Vitesse de rotation en Hz
 rotation_speed_hz = st.sidebar.number_input("Vitesse de rotation (Hz)", 
                                          min_value=0.1, 
                                          max_value=1000.0, 
@@ -91,8 +91,6 @@ selected_bearing = bearing_data[
     (bearing_data['Manufacturer'] == selected_manufacturer) & 
     (bearing_data['Name'] == selected_model)
 ].iloc[0]
-
-rotation_speed_hz = rotation_speed_rpm  # 
 
 # Calcul des fréquences caractéristiques
 ftf_freq = selected_bearing['FTF'] * rotation_speed_hz
@@ -115,7 +113,6 @@ show_bpfo = st.sidebar.checkbox("Afficher BPFO", True)
 show_bpfi = st.sidebar.checkbox("Afficher BPFI", True)
 show_harmonics = st.sidebar.checkbox("Afficher les harmoniques", True)
 
-# [...] (Le reste de du code existant jusqu'à la partie FFT après traitement)-----------
 # Upload du fichier CSV
 uploaded_file = st.file_uploader("Importez votre fichier CSV", type=["csv"])
 

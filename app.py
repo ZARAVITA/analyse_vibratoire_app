@@ -32,7 +32,7 @@ Ce projet a été réalisé par **M. A Angelico** et **ZARAVITA** dans le cadre 
 # Chargement des données des roulements depuis GitHub
 @st.cache_data
 def load_bearing_data():
-    url = "https://raw.githubusercontent.com/[votre_utilisateur]/[votre_repo]/main/Bearing%20data%20Base.xlsx"
+    url = "https://raw.githubusercontent.com/ZARAVITA/analyse_vibratoire_app/main/Bearing%20data%20Base.xlsx"
     try:
         response = requests.get(url)
         bearing_data = pd.read_excel(BytesIO(response.content))

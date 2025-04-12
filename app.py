@@ -112,6 +112,7 @@ show_bsf = st.sidebar.checkbox("Afficher BSF", True)
 show_bpfo = st.sidebar.checkbox("Afficher BPFO", True)
 show_bpfi = st.sidebar.checkbox("Afficher BPFI", True)
 show_harmonics = st.sidebar.checkbox("Afficher les harmoniques", True)
+harmonics_count = st.sidebar.slider("Nombre d'harmoniques à afficher", 1, 5, 3) if show_harmonics else 0
 
 # Upload du fichier CSV
 uploaded_file = st.file_uploader("Importez votre fichier CSV", type=["csv"])
@@ -444,10 +445,18 @@ if uploaded_file is not None:
                     hovertemplate=f'{freq_type}<br>Fréquence: {measured_freq:.1f} Hz<br>Amplitude: {measured_amp:.2f}<extra></extra>'
                 ))
                 
+                # Ajout d'une ligne verticale pour la fréquence fondamentale
+                fig.add_shape(
+                    type='line',
+                    x0=measured_freq, y0=0,
+                    x1=measured_freq, y1=measured_amp,
+                    line=dict(color=freq_colors[freq_type], width=1, dash='dot')
+                )
+                
                 # Ajout des harmoniques si activé
                 if show_harmonics:
                     harmonics_row = {f'Harmonique': freq_type}
-                    for i in range(1, 6):  # 5 harmoniques
+                    for i in range(1, harmonics_count + 1):  # Harmoniques jusqu'au nombre sélectionné
                         harmonic_freq = i * freq
                         idx_harm = np.abs(frequencies - harmonic_freq).argmin()
                         harmonic_freq_measured = frequencies[idx_harm]
@@ -465,12 +474,24 @@ if uploaded_file is not None:
                             hovertemplate=f'{freq_type} {i}×<br>Fréquence: {harmonic_freq_measured:.1f} Hz<br>Amplitude: {harmonic_amp:.2f}<extra></extra>'
                         ))
                         
-                        # Ajout d'une ligne verticale
+                        # Ajout d'une ligne verticale pour l'harmonique
                         fig.add_shape(
                             type='line',
                             x0=harmonic_freq_measured, y0=0,
                             x1=harmonic_freq_measured, y1=harmonic_amp,
                             line=dict(color=freq_colors[freq_type], width=1, dash='dot')
+                        )
+                        
+                        # Ajout d'une annotation avec la valeur exacte
+                        fig.add_annotation(
+                            x=harmonic_freq_measured,
+                            y=harmonic_amp,
+                            text=f'{harmonic_freq_measured:.1f} Hz',
+                            showarrow=True,
+                            arrowhead=1,
+                            ax=0,
+                            ay=-30,
+                            font=dict(color=freq_colors[freq_type], size=10)
                         )
                         
                         # Stockage des données pour le tableau
@@ -486,7 +507,7 @@ if uploaded_file is not None:
             
             # Réorganisation des colonnes
             columns_order = ['Harmonique']
-            for i in range(1, 6):
+            for i in range(1, harmonics_count + 1):
                 columns_order.extend([f'{i}× Fréquence (Hz)', f'{i}× Amplitude'])
             
             summary_df = summary_df[columns_order]

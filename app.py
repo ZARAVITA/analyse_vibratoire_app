@@ -113,7 +113,12 @@ show_bpfo = st.sidebar.checkbox("Afficher BPFO", True)
 show_bpfi = st.sidebar.checkbox("Afficher BPFI", True)
 show_harmonics = st.sidebar.checkbox("Afficher les harmoniques", True)
 harmonics_count = st.sidebar.slider("Nombre d'harmoniques à afficher", 1, 5, 3) if show_harmonics else 0
+
+# Nouvelle option pour les harmoniques de vitesse
+st.sidebar.subheader("Options des harmoniques de vitesse")
 show_speed_harmonics = st.sidebar.checkbox("Afficher les harmoniques de vitesse", False)
+speed_harmonics_count = st.sidebar.slider("Nombre d'harmoniques de vitesse", 1, 5, 3) if show_speed_harmonics else 0
+speed_harmonics_color = st.sidebar.color_picker("Couleur des harmoniques de vitesse", "#FFA500")  # Orange par défaut
 
 # Upload du fichier CSV
 uploaded_file = st.file_uploader("Importez votre fichier CSV", type=["csv"])
@@ -418,7 +423,7 @@ if uploaded_file is not None:
             'BSF': 'green',
             'BPFO': 'blue',
             'BPFI': 'red',
-            'Vitesse': 'orange'
+            'Vitesse': speed_harmonics_color
         }
         
         # Dictionnaire pour stocker les données du tableau récapitulatif
@@ -505,7 +510,7 @@ if uploaded_file is not None:
         # Ajout des harmoniques de vitesse si activé
         if show_speed_harmonics:
             speed_harmonics_row = {'Harmonique': 'Vitesse'}
-            for i in range(1, harmonics_count + 1):
+            for i in range(1, speed_harmonics_count + 1):
                 speed_harmonic = i * rotation_speed_hz
                 idx_speed = np.abs(frequencies - speed_harmonic).argmin()
                 speed_harmonic_measured = frequencies[idx_speed]
@@ -517,13 +522,13 @@ if uploaded_file is not None:
                     y=[speed_amp],
                     mode='markers+text',
                     marker=dict(size=10, color=freq_colors['Vitesse']),
-                    text=f'Vitesse {i}×',
+                    text=f'V {i}×',  # Format court "V 1×", "V 2×", etc.
                     textposition='top center',
                     name=f'Vitesse {i}×',
                     hovertemplate=f'Vitesse {i}×<br>Fréquence: {speed_harmonic_measured:.1f} Hz<br>Amplitude: {speed_amp:.2f}<extra></extra>'
                 ))
                 
-                # Ajout d'une ligne verticale
+                # Ajout d'une ligne verticale pointillée orange
                 fig.add_shape(
                     type='line',
                     x0=speed_harmonic_measured, y0=0,
@@ -531,7 +536,7 @@ if uploaded_file is not None:
                     line=dict(color=freq_colors['Vitesse'], width=1, dash='dot')
                 )
                 
-                # Ajout d'une annotation
+                # Ajout d'une annotation avec la valeur exacte
                 fig.add_annotation(
                     x=speed_harmonic_measured,
                     y=speed_amp,
@@ -556,7 +561,8 @@ if uploaded_file is not None:
             
             # Réorganisation des colonnes
             columns_order = ['Harmonique']
-            for i in range(1, harmonics_count + 1):
+            max_harmonics = max(harmonics_count, speed_harmonics_count) if show_speed_harmonics else harmonics_count
+            for i in range(1, max_harmonics + 1):
                 columns_order.extend([f'{i}× Fréquence (Hz)', f'{i}× Amplitude'])
             
             summary_df = summary_df[columns_order]

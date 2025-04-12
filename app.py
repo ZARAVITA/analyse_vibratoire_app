@@ -113,6 +113,7 @@ show_bpfo = st.sidebar.checkbox("Afficher BPFO", True)
 show_bpfi = st.sidebar.checkbox("Afficher BPFI", True)
 show_harmonics = st.sidebar.checkbox("Afficher les harmoniques", True)
 harmonics_count = st.sidebar.slider("Nombre d'harmoniques à afficher", 1, 5, 3) if show_harmonics else 0
+show_speed_harmonics = st.sidebar.checkbox("Afficher les harmoniques de vitesse", False)
 
 # Upload du fichier CSV
 uploaded_file = st.file_uploader("Importez votre fichier CSV", type=["csv"])
@@ -416,7 +417,8 @@ if uploaded_file is not None:
             'FTF': 'violet',
             'BSF': 'green',
             'BPFO': 'blue',
-            'BPFI': 'red'
+            'BPFI': 'red',
+            'Vitesse': 'orange'
         }
         
         # Dictionnaire pour stocker les données du tableau récapitulatif
@@ -499,6 +501,53 @@ if uploaded_file is not None:
                         harmonics_row[f'{i}× Amplitude'] = f'{harmonic_amp:.2f}'
                     
                     summary_data.append(harmonics_row)
+        
+        # Ajout des harmoniques de vitesse si activé
+        if show_speed_harmonics:
+            speed_harmonics_row = {'Harmonique': 'Vitesse'}
+            for i in range(1, harmonics_count + 1):
+                speed_harmonic = i * rotation_speed_hz
+                idx_speed = np.abs(frequencies - speed_harmonic).argmin()
+                speed_harmonic_measured = frequencies[idx_speed]
+                speed_amp = fft_magnitudes[idx_speed]
+                
+                # Ajout au graphique
+                fig.add_trace(go.Scatter(
+                    x=[speed_harmonic_measured],
+                    y=[speed_amp],
+                    mode='markers+text',
+                    marker=dict(size=10, color=freq_colors['Vitesse']),
+                    text=f'Vitesse {i}×',
+                    textposition='top center',
+                    name=f'Vitesse {i}×',
+                    hovertemplate=f'Vitesse {i}×<br>Fréquence: {speed_harmonic_measured:.1f} Hz<br>Amplitude: {speed_amp:.2f}<extra></extra>'
+                ))
+                
+                # Ajout d'une ligne verticale
+                fig.add_shape(
+                    type='line',
+                    x0=speed_harmonic_measured, y0=0,
+                    x1=speed_harmonic_measured, y1=speed_amp,
+                    line=dict(color=freq_colors['Vitesse'], width=1, dash='dot')
+                )
+                
+                # Ajout d'une annotation
+                fig.add_annotation(
+                    x=speed_harmonic_measured,
+                    y=speed_amp,
+                    text=f'{speed_harmonic_measured:.1f} Hz',
+                    showarrow=True,
+                    arrowhead=1,
+                    ax=0,
+                    ay=-30,
+                    font=dict(color=freq_colors['Vitesse'], size=10)
+                )
+                
+                # Stockage des données pour le tableau
+                speed_harmonics_row[f'{i}× Fréquence (Hz)'] = f'{speed_harmonic_measured:.1f}'
+                speed_harmonics_row[f'{i}× Amplitude'] = f'{speed_amp:.2f}'
+            
+            summary_data.append(speed_harmonics_row)
         
         # Affichage du tableau récapitulatif
         if summary_data:

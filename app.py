@@ -11,6 +11,8 @@ import numpy as np
 import plotly.graph_objects as go
 from scipy.signal import butter, filtfilt
 from scipy.fft import fft, fftfreq
+import requests
+from io import BytesIO
 
 # Titre de l'application
 st.markdown("""
@@ -21,10 +23,34 @@ Cette application est conçue pour l'analyse vibratoire de signaux. Elle permet 
    - Filtre passe-haut (fréquence de coupure réglable).
    - Redressement du signal.
    - Filtre passe-bas (fréquence de coupure réglable).
-4. **Affichage des résultats** : Visualisez le signal après traitement et son spectre FFT.
+4. **Analyse des fréquences caractéristiques** : Sélectionnez un roulement et la vitesse de rotation pour afficher les fréquences caractéristiques (FTF, BSF, BPFO, BPFI) et leurs harmoniques.
+5. **Affichage des résultats** : Visualisez le signal après traitement et son spectre FFT avec les fréquences caractéristiques.
 
 Ce projet a été réalisé par **M. A Angelico** et **ZARAVITA** dans le cadre de l'analyse vibratoire.
 """)
+
+# Chargement des données des roulements depuis GitHub
+@st.cache_data
+def load_bearing_data():
+    url = "https://raw.githubusercontent.com/[votre_utilisateur]/[votre_repo]/main/Bearing%20data%20Base.xlsx"
+    try:
+        response = requests.get(url)
+        bearing_data = pd.read_excel(BytesIO(response.content))
+        return bearing_data
+    except:
+        st.warning("Impossible de charger les données des roulements depuis GitHub. Utilisation des données par défaut.")
+        # Données par défaut si le chargement échoue
+        return pd.DataFrame({
+            'Manufacturer': ['AMI', 'AMI', 'AMI'],
+            'Name': ['201', '202', '203'],
+            'Number of Rollers': [8, 8, 8],
+            'FTF': [0.383, 0.383, 0.383],
+            'BSF': [2.025, 2.025, 2.025],
+            'BPFO': [3.066, 3.066, 3.066],
+            'BPFI': [4.934, 4.934, 4.934]
+        })
+
+bearing_db = load_bearing_data()
 
 # Upload du fichier CSV
 uploaded_file = st.file_uploader("Importez votre fichier CSV", type=["csv"])
@@ -218,7 +244,7 @@ if uploaded_file is not None:
                         text=f'H{i}',
                         textposition='top center',
                         name=f'Harmonique {i}',
-                        hovertemplate=f'H{i}: {freq_harm:.1f} Hz<br>Amplitude: {amp_harm:.2f}<extra></extra>'
+                        hovertemplate=f'H{i}: {freq_harm:.1f} Hz<br>Amplitude: {harmonic_amp:.2f}<extra></extra>'
                     ))
                     
                     fft_fig.add_annotation(
@@ -305,7 +331,45 @@ if uploaded_file is not None:
                 frequency = 1 / delta_t
                 st.success(f"Fréquence calculée: {frequency:.2f} Hz")
     
-    # Affichage du spectre FFT interactif
+    # Section pour la sélection du roulement et la vitesse de rotation
+    st.sidebar.header("Paramètres du roulement")
+    
+    # Sélection du fabricant
+    manufacturers = sorted(bearing_db['Manufacturer'].unique())
+    selected_manufacturer = st.sidebar.selectbox("Fabricant", manufacturers)
+    
+    # Filtrage des noms de roulements en fonction du fabricant sélectionné
+    names = sorted(bearing_db[bearing_db['Manufacturer'] == selected_manufacturer]['Name'].unique())
+    selected_name = st.sidebar.selectbox("Modèle", names)
+    
+    # Filtrage du nombre de rouleaux en fonction du modèle sélectionné
+    rollers = bearing_db[(bearing_db['Manufacturer'] == selected_manufacturer) & 
+                         (bearing_db['Name'] == selected_name)]['Number of Rollers'].unique()
+    selected_roller = st.sidebar.selectbox("Nombre de rouleaux", rollers)
+    
+    # Sélection de la vitesse de rotation
+    running_speed = st.sidebar.number_input("Vitesse de rotation (RPM)", min_value=1, max_value=10000, value=1800)
+    running_speed_hz = running_speed / 60  # Conversion en Hz
+    
+    # Récupération des coefficients du roulement sélectionné
+    bearing_coeffs = bearing_db[(bearing_db['Manufacturer'] == selected_manufacturer) & 
+                               (bearing_db['Name'] == selected_name) & 
+                               (bearing_db['Number of Rollers'] == selected_roller)].iloc[0]
+    
+    # Calcul des fréquences caractéristiques
+    ftf = bearing_coeffs['FTF'] * running_speed_hz
+    bsf = bearing_coeffs['BSF'] * running_speed_hz
+    bpfo = bearing_coeffs['BPFO'] * running_speed_hz
+    bpfi = bearing_coeffs['BPFI'] * running_speed_hz
+    
+    # Affichage des fréquences caractéristiques
+    st.sidebar.markdown("### Fréquences caractéristiques calculées")
+    st.sidebar.write(f"FTF: {ftf:.2f} Hz")
+    st.sidebar.write(f"BSF: {bsf:.2f} Hz")
+    st.sidebar.write(f"BPFO: {bpfo:.2f} Hz")
+    st.sidebar.write(f"BPFI: {bpfi:.2f} Hz")
+    
+    # Affichage du spectre FFT interactif avec les fréquences caractéristiques
     if st.checkbox("Afficher le spectre FFT du signal après traitement BLSD"):
         n = len(signal_filtre)
         f_min = st.slider("Zoom sur fréquence minimale (Hz)", 1, n//2, 1)
@@ -323,63 +387,115 @@ if uploaded_file is not None:
             hovertemplate='Freq: %{x:.1f} Hz<br>Amplitude: %{y:.1f}<extra></extra>'
         ))
         
-        # Ajout des harmoniques
-        st.subheader("Analyse des harmoniques")
-        fundamental_freq = st.slider(
-            "Sélectionnez la fréquence fondamentale pour afficher ses harmoniques", 
-            min_value=float(f_min), 
-            max_value=float(f_limit), 
-            value=float(f_min),
-            step=0.1
-        )
+        # Options d'affichage des fréquences caractéristiques
+        st.subheader("Options d'affichage des fréquences caractéristiques")
+        col1, col2, col3, col4 = st.columns(4)
+        show_ftf = col1.checkbox("FTF", value=True)
+        show_bsf = col2.checkbox("BSF", value=True)
+        show_bpfo = col3.checkbox("BPFO", value=True)
+        show_bpfi = col4.checkbox("BPFI", value=True)
         
-        if fundamental_freq > 0:
-            harmonics_data = []
-            for i in range(1, 6):  # 5 harmoniques
-                freq = i * fundamental_freq
-                idx = np.abs(frequencies - freq).argmin()
-                harmonic_freq = frequencies[idx]
-                harmonic_amp = fft_magnitudes[idx]
-                
-                # Stocker les données pour le tableau
-                harmonics_data.append({
-                    'Harmonique': f'H{i}',
-                    'Fréquence (Hz)': f'{harmonic_freq:.1f}',
-                    'Amplitude': f'{harmonic_amp:.2f}'
-                })
-                
-                # Ajouter le point et l'annotation
-                fig.add_trace(go.Scatter(
-                    x=[harmonic_freq],
-                    y=[harmonic_amp],
-                    mode='markers+text',
-                    marker=dict(size=10, color='red'),
-                    text=f'H{i}',
-                    textposition='top center',
-                    name=f'Harmonique {i}',
-                    hovertemplate=f'H{i}<br>Fréquence: {harmonic_freq:.1f} Hz<br>Amplitude: {harmonic_amp:.2f}<extra></extra>'
-                ))
-                
-                # Ajouter une annotation avec les coordonnées exactes
-                fig.add_annotation(
-                    x=harmonic_freq,
-                    y=harmonic_amp,
-                    text=f'({harmonic_freq:.1f} Hz, {harmonic_amp:.1f})',
-                    showarrow=True,
-                    arrowhead=1,
-                    ax=0,
-                    ay=-30,
-                    font=dict(color='red')
-                )
+        show_harmonics = st.checkbox("Afficher les harmoniques (jusqu'à 5ème)", value=True)
+        
+        # Couleurs pour les différentes fréquences
+        colors = {
+            'FTF': 'purple',
+            'BSF': 'green',
+            'BPFO': 'blue',
+            'BPFI': 'orange'
+        }
+        
+        # Dictionnaire pour stocker les données des fréquences
+        freq_data = {
+            'FTF': ftf,
+            'BSF': bsf,
+            'BPFO': bpfo,
+            'BPFI': bpfi
+        }
+        
+        # Affichage des fréquences caractéristiques et de leurs harmoniques
+        freq_table_data = []
+        
+        for freq_name, freq_value in freq_data.items():
+            if (freq_name == 'FTF' and not show_ftf) or \
+               (freq_name == 'BSF' and not show_bsf) or \
+               (freq_name == 'BPFO' and not show_bpfo) or \
+               (freq_name == 'BPFI' and not show_bpfi):
+                continue
             
-            # Afficher un tableau récapitulatif des harmoniques
-            st.write("Détails des harmoniques:")
-            harmonics_df = pd.DataFrame(harmonics_data)
-            st.table(harmonics_df)
+            # Trouver l'index le plus proche de la fréquence caractéristique
+            idx = np.abs(frequencies - freq_value).argmin()
+            exact_freq = frequencies[idx]
+            amp = fft_magnitudes[idx]
+            
+            # Ajouter la fréquence fondamentale
+            fig.add_trace(go.Scatter(
+                x=[exact_freq],
+                y=[amp],
+                mode='markers+text',
+                marker=dict(size=10, color=colors[freq_name]),
+                text=freq_name,
+                textposition='top center',
+                name=freq_name,
+                hovertemplate=f'{freq_name}: {exact_freq:.1f} Hz<br>Amplitude: {amp:.2f}<extra></extra>'
+            ))
+            
+            # Ajouter une annotation avec les coordonnées exactes
+            fig.add_annotation(
+                x=exact_freq,
+                y=amp,
+                text=f'{exact_freq:.1f} Hz',
+                showarrow=True,
+                arrowhead=1,
+                ax=0,
+                ay=-30,
+                font=dict(color=colors[freq_name])
+            )
+            
+            # Stocker les données pour le tableau
+            freq_table_data.append({
+                'Type': freq_name,
+                'Fréquence théorique': f'{freq_value:.2f} Hz',
+                'Fréquence mesurée': f'{exact_freq:.1f} Hz',
+                'Amplitude': f'{amp:.2f}'
+            })
+            
+            # Ajouter les harmoniques si demandé
+            if show_harmonics:
+                for i in range(2, 6):  # Harmoniques 2 à 5
+                    harmonic_freq = i * freq_value
+                    idx_harm = np.abs(frequencies - harmonic_freq).argmin()
+                    exact_harm_freq = frequencies[idx_harm]
+                    amp_harm = fft_magnitudes[idx_harm]
+                    
+                    fig.add_trace(go.Scatter(
+                        x=[exact_harm_freq],
+                        y=[amp_harm],
+                        mode='markers+text',
+                        marker=dict(size=8, color=colors[freq_name]),
+                        text=f'{freq_name} H{i}',
+                        textposition='top center',
+                        name=f'{freq_name} H{i}',
+                        hovertemplate=f'{freq_name} H{i}: {exact_harm_freq:.1f} Hz<br>Amplitude: {amp_harm:.2f}<extra></extra>'
+                    ))
+                    
+                    # Stocker les données des harmoniques pour le tableau
+                    freq_table_data.append({
+                        'Type': f'{freq_name} H{i}',
+                        'Fréquence théorique': f'{harmonic_freq:.2f} Hz',
+                        'Fréquence mesurée': f'{exact_harm_freq:.1f} Hz',
+                        'Amplitude': f'{amp_harm:.2f}'
+                    })
+        
+        # Afficher un tableau récapitulatif des fréquences
+        if freq_table_data:
+            st.write("Détails des fréquences caractéristiques:")
+            freq_df = pd.DataFrame(freq_table_data)
+            st.table(freq_df)
         
         # Configuration de l'interactivité
         fig.update_layout(
-            title='Spectre FFT du Signal après Traitement BLSD',
+            title=f'Spectre FFT du Signal après Traitement BLSD - Vitesse: {running_speed} RPM',
             xaxis_title='Fréquence (Hz)',
             yaxis_title='Amplitude',
             hovermode='x unified',

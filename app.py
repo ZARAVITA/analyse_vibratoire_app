@@ -442,7 +442,7 @@ if uploaded_file is not None:
         for freq_type, show, freq in [('FTF', show_ftf, ftf_freq),
                                      ('BSF', show_bsf, bsf_freq),
                                      ('BPFO', show_bpfo, bpfo_freq),
-                                     ('BPFI', show_bpfi,selected_bearing['BPFI'] * rotation_speed_hz):  #------------------------
+                                     ('BPFI', show_bpfi,selected_bearing['BPFI'] * rotation_speed_hz)]:  #------------------------
                                      #('BPFI', show_bpfi, bpfi_freq)]:
             if show:
                 # Fréquence fondamentale

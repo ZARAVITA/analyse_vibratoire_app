@@ -36,6 +36,9 @@ def load_bearing_data():
         response = requests.get(url)
         response.raise_for_status()
         bearing_data = pd.read_excel(BytesIO(response.content))
+        # Nettoyage agressif
+        bearing_data = bearing_data.dropna(subset=['Manufacturer'])  # Supprime les NaN
+        bearing_data['Manufacturer'] = bearing_data['Manufacturer'].astype(str).str.strip()  # Nettoie les strings
         return bearing_data
     except:
         # Données par défaut si le chargement échoue

@@ -56,6 +56,8 @@ def load_bearing_data():
                     4.91, 7.78, 12.28, 12.28]
         }
         return pd.DataFrame(default_data)
+df=pd.read_excel("Bearing data Base.xlsx")           ----------------------------------------------------------
+print(len(df))                                      -----------------------------------------------------------
 
 bearing_data = load_bearing_data()
 

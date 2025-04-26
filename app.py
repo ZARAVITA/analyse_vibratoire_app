@@ -39,6 +39,8 @@ def load_bearing_data():
         # Nettoyage agressif
         bearing_data = bearing_data.dropna(subset=['Manufacturer'])  # Supprime les NaN
         bearing_data['Manufacturer'] = bearing_data['Manufacturer'].astype(str).str.strip()  # Nettoie les strings
+        bearing_data['BPFI'] = pd.to_numeric(bearing_data['FTF','BSF','BPFO', 'BPFI'], errors='coerce')
+        bearing_data = bearing_data.dropna(subset=['FTF','BSF','BPFO', 'BPFI'])
         return bearing_data
     except:
         # Données par défaut si le chargement échoue

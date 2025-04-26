@@ -513,7 +513,7 @@ if uploaded_file is not None:
                         
                         # Stockage des données pour le tableau
                         harmonics_row[f'{i}× Fréquence (Hz)'] = f'{harmonic_freq_measured:.1f}'
-                        harmonics_row[f'{i}× Amplitude'] = f'{harmonic_amp:.2f}'
+                        #harmonics_row[f'{i}× Amplitude'] = f'{harmonic_amp:.2f}'                      #----------------------pas d'harmonique
                     
                     summary_data.append(harmonics_row)
         

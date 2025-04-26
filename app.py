@@ -569,6 +569,7 @@ if uploaded_file is not None:
             summary_data.append(speed_harmonics_row)
         
         # Affichage du tableau récapitulatif
+        '''                                                           #Fais en commentaire à partir d'ici ----------------------------------------
         if summary_data:
             st.subheader("Tableau récapitulatif des fréquences")
             summary_df = pd.DataFrame(summary_data)
@@ -589,8 +590,8 @@ if uploaded_file is not None:
                 data=csv,
                 file_name='frequences_caracteristiques.csv',
                 mime='text/csv'
-            )
-        
+            )                                                    #la fin ici ----------------------------------------
+           '''
         # Configuration de l'interactivité
         fig.update_layout(
             title='Spectre FFT du Signal après Traitement BLSD avec Fréquences Caractéristiques',

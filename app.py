@@ -474,7 +474,11 @@ if uploaded_file is not None:
                 if show_harmonics:
                     harmonics_row = {f'Harmonique': freq_type}
                     for i in range(1, harmonics_count + 1):  # Harmoniques jusqu'au nombre sélectionné
-                        harmonic_freq = i * freq
+                        if freq_type == 'BPFI':                                                                     #TOKON TSISY--------------
+                            base_freq = selected_bearing['BPFI']  # Valeur de base du roulement
+                            harmonic_freq = i * base_freq * rotation_speed_hz  # Harmonique correcte
+                        else:
+                          harmonic_freq = i * freq                                                     #Tokon ity fa tss if else ambony io
                         idx_harm = np.abs(frequencies - harmonic_freq).argmin()
                         harmonic_freq_measured = frequencies[idx_harm]
                         harmonic_amp = fft_magnitudes[idx_harm]

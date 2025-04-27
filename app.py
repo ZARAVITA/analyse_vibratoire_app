@@ -412,7 +412,7 @@ if uploaded_file is not None:
     if st.checkbox("Afficher le spectre FFT du signal après traitement BLSD"):
         n = len(signal_filtre)
         f_min = st.slider("Zoom sur fréquence minimale (Hz)", 1, n//2, 1)
-        f_limit = st.slider("Zoom sur fréquence maximale (Hz)", n//1000, n//2, 500)
+        f_limit = st.slider("Zoom sur fréquence maximale (Hz)", n//1000, n//2, 800)
         valeur_fft = fft(signal_filtre)
         frequencies = fftfreq(n, d=1/fs)[:n//2][f_min:f_limit]
         fft_magnitudes = 2.0/n * np.abs(valeur_fft[0:n//2])[f_min:f_limit]

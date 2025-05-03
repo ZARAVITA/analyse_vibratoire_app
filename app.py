@@ -680,7 +680,7 @@ if st.checkbox("Afficher l'analyse d'autocorrélation"):
                 mode='lines+markers',
                 line=dict(color='#1f77b4', width=1),
                 marker=dict(size=4, color='#ff7f0e')
-            )
+            ))
             fig2.update_layout(
                 title="FFT de l'autocorrélation",
                 xaxis_title="Fréquence (Hz)",

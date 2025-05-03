@@ -605,35 +605,61 @@ if uploaded_file is not None:
         st.plotly_chart(fig, config={'displayModeBar': True})
    #Afficher l'autocorrelation   -----------------------------------------------------------
     if st.checkbox("Afficher l'analyse d'autocorrélation"):
-          st.subheader("Analyse d'autocorrélation")
-    
-          # Calcul de l'autocorrélation normalisée
-          autocorr = np.correlate(amplitude, amplitude, mode='same')
-          autocorr = autocorr[len(autocorr)//2:]  # Troncature à la moitié
-          autocorr = autocorr / autocorr.max()     # Normalisation entre 0 et 1
-          
-          # Génération de l'échelle temporelle
-          t_autocorr = np.arange(len(autocorr)) / fs
-          
-          # Création du graphique
-          fig_autocorr = go.Figure()
-          fig_autocorr.add_trace(go.Scatter(
-              x=t_autocorr,
-              y=autocorr,
-              mode='lines',
-              name='Autocorrélation',
-              line=dict(width=1.5, color='#FF4B4B'),
-              hovertemplate='Décalage: %{x:.3f}s<br>Coeff: %{y:.3f}<extra></extra>'
-          ))
-          
-          # Paramètres d'affichage
-          fig_autocorr.update_layout(
-              title="Autocorrélation du signal (décalages positifs)",
-              xaxis_title="Décalage temporel (s)",
-              yaxis_title="Coefficient de corrélation",
-              hovermode='x unified',
-              height=400
-          )
-          st.plotly_chart(fig_autocorr)        # FIN AUTOCORRELATION
+       st.subheader("Analyse d'autocorrélation scientifique")
+       def calculate_proper_autocorrelation(signal):
+             """Calcule l'autocorrélation normalisée selon la formule du document"""
+             N = len(signal)
+             
+             # Calcul de R(τ)
+             R = np.zeros(N)
+             signal_mean = np.mean(signal)  # Calcul de la moyenne pour décalage
+             
+             for τ in range(N):
+                 if τ == 0:
+                     # Cas spécial pour τ=0 (variance)
+                     R[τ] = np.sum((signal - signal_mean)**2) / N
+                 else:
+                     # Calcul de la somme des produits décalés
+                     sum_products = np.sum((signal[:-τ] - signal_mean) * (signal[τ:] - signal_mean))
+                     R[τ] = sum_products / (N - τ)  # Correction du nombre de termes
+                     
+             # Calcul du coefficient A(τ)
+             R0 = R[0] if R[0] != 0 else 1e-10  # Éviter la division par zéro
+             A = R / R0
+             
+             return A[:N//2 + 1]  # Ne garder que la moitié physique
+
+
+       with st.spinner('Calcul des coefficients...'):
+           A = calculate_proper_autocorrelation(amplitude)
+           t_autocorr = np.arange(len(A)) / fs
+           
+           fig = go.Figure()
+           fig.add_trace(go.Scatter(
+               x=t_autocorr,
+               y=A,
+               mode='lines+markers',
+               line=dict(color='#FF6B6B', width=2),
+               marker=dict(size=5, color='#4B4453'),
+               name='A(τ)'
+           ))
+           
+           fig.update_layout(
+               title="Coefficient d'autocorrélation normalisé",
+               xaxis_title="Décalage temporel τ [s]",
+               yaxis_title="A(τ)",
+               yaxis_range=[-1.1, 1.1],  # Forcer l'échelle [-1, 1]
+               shapes=[{
+                   'type': 'line',
+                   'y0': 0,
+                   'y1': 0,
+                   'x0': 0,
+                   'x1': t_autocorr[-1],
+                   'line': {'color': 'gray', 'dash': 'dot'}
+               }],
+               height=500
+           )
+           
+           st.plotly_chart(fig)       # FIN AUTOCORRELATION
 else:
     st.info("Veuillez importer un fichier CSV pour commencer l'analyse.")

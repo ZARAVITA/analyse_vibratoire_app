@@ -604,103 +604,98 @@ if uploaded_file is not None:
         
         st.plotly_chart(fig, config={'displayModeBar': True})
    #Afficher l'autocorrelation   -----------------------------------------------------------
-    if st.checkbox("Afficher l'analyse d'autocorrélation"):
-       st.subheader("Analyse d'autocorrélation scientifique")
-       def calculate_proper_autocorrelation(signal):
-             """Calcule l'autocorrélation normalisée selon la formule du document"""
-             N = len(signal)
-             
-             # Calcul de R(τ)
-             R = np.zeros(N)
-             signal_mean = np.mean(signal)  # Calcul de la moyenne pour décalage
-             
-             for τ in range(N):
-                 if τ == 0:
-                     # Cas spécial pour τ=0 (variance)
-                     R[τ] = np.sum((signal - signal_mean)**2) / N
-                 else:
-                     # Calcul de la somme des produits décalés
-                     sum_products = np.sum((signal[:-τ] - signal_mean) * (signal[τ:] - signal_mean))
-                     R[τ] = sum_products / (N - τ)  # Correction du nombre de termes
-                     
-             # Calcul du coefficient A(τ)
-             R0 = R[0] if R[0] != 0 else 1e-10  # Éviter la division par zéro
-             A = R / R0
-             
-             return A[:N//2 + 1]  # Ne garder que la moitié physique
+if st.checkbox("Afficher l'analyse d'autocorrélation"):
+    st.subheader("Analyse d'autocorrélation scientifique")
+    
+    def calculate_proper_autocorrelation(signal):
+        """Version optimisée avec vérifications"""
+        signal = np.array(signal, dtype=np.float64)
+        N = len(signal)
+        if N < 2:
+            return np.zeros(1)
+        
+        signal = signal - np.mean(signal)
+        R = np.zeros(N)
+        
+        # Calcul vectoriel pour τ=0
+        R[0] = np.mean(signal**2)
+        
+        # Calcul parallélisé pour τ>0
+        for τ in range(1, N):
+            valid = N - τ
+            if valid < 1: break
+            R[τ] = np.dot(signal[:N-τ], signal[τ:]) / valid
+        
+        R0 = R[0] if R[0] > 1e-12 else 1.0
+        return R[:N//2 + 1]/R0
 
-
-       
-       with st.spinner('Calcul des coefficients...'):
+    with st.spinner('Calcul des coefficients...'):
+        try:
             A = calculate_proper_autocorrelation(amplitude)
-            t_autocorr = np.arange(len(A)) / fs
+            if np.all(np.isnan(A)):
+                raise ValueError("Autocorrélations invalides (NaNs)")
             
-            # Graphique d'autocorrélation style bleu
+            t_autocorr = np.arange(len(A)) / fs
+
+            # Graphique autocorrélation
             fig1 = go.Figure()
             fig1.add_trace(go.Scatter(
                 x=t_autocorr,
                 y=A,
                 mode='lines',
-                line=dict(color='#1f77b4', width=2),  # Ligne bleue épaisse
-                name='A(τ)'
-            ))
-            
+                line=dict(color='#1f77b4', width=2),
+            )
             fig1.update_layout(
-                title="Coefficient d'autocorrélation",
-                xaxis_title="Décalage temporel τ [s]",
-                yaxis_title="Amplitude",
-                xaxis_range=[0, 0.2],  # Zoom sur la zone utile
-                hovermode="x unified",
+                title="Autocorrélation normalisée",
+                xaxis_title="Décalage τ (s)",
+                yaxis=dict(range=[-1.1, 1.1]),
                 height=400
             )
             st.plotly_chart(fig1)
 
-            # Calcul de la FFT de l'autocorrélation
-            st.subheader("FFT de l'autocorrélation")
-            N = len(A)
-            X = fft(A)
-            freq = fftfreq(N, 1/fs)[:N//2]
-            X_abs = np.abs(X[:N//2]) * 2.0/N
+            # FFT et vérifications
+            N_fft = len(A)
+            if N_fft < 2:
+                st.warning("Signal trop court pour FFT")
+                return
+                
+            X = fft(A, n=N_fft)
+            freq = fftfreq(N_fft, 1/fs)[:N_fft//2]
+            X_abs = np.abs(X[:N_fft//2]) * 2.0/N_fft
 
-            # Détection du pic principal
-            locX = np.argmax(X_abs)
-            peakX = X_abs[locX]
+            if len(freq) == 0 or len(X_abs) == 0:
+                st.error("Erreur dans le calcul FFT")
+                return
+
+            # Détection pic principal
+            locX = np.nanargmax(X_abs) if not np.all(np.isnan(X_abs)) else 0
             freqX = freq[locX]
+            peakX = X_abs[locX]
 
-            # Graphique FFT style bleu
+            # Graphique FFT
             fig2 = go.Figure()
             fig2.add_trace(go.Scatter(
                 x=freq,
                 y=X_abs,
-                mode='lines',
-                line=dict(color='#1f77b4', width=2),
-                name='Spectre'
-            ))
-            
-            fig2.add_trace(go.Scatter(
-                x=[freqX],
-                y=[peakX],
-                mode='markers',
-                marker=dict(color='#ff7f0e', size=10),
-                name=f'Pic à {freqX:.2f} Hz'
-            ))
-
+                mode='lines+markers',
+                line=dict(color='#1f77b4', width=1),
+                marker=dict(size=4, color='#ff7f0e')
+            )
             fig2.update_layout(
                 title="FFT de l'autocorrélation",
                 xaxis_title="Fréquence (Hz)",
                 yaxis_title="Amplitude",
-                xaxis_range=[0, 0.4*fs],
-                annotations=[
-                    dict(
-                        x=freqX,
-                        y=peakX,
-                        text=f'{freqX:.2f} Hz',
-                        showarrow=True,
-                        arrowhead=1
-                    )
-                ],
+                annotations=[dict(
+                    x=freqX,
+                    y=peakX,
+                    text=f"{freqX:.2f} Hz",
+                    showarrow=True
+                )],
                 height=400
             )
-            st.plotly_chart(fig2)  # FIN AUTOCORRELATION
+            st.plotly_chart(fig2)
+
+        except Exception as e:
+            st.error(f"Erreur lors du calcul: {str(e)}") # FIN AUTOCORRELATION
 else:
     st.info("Veuillez importer un fichier CSV pour commencer l'analyse.")

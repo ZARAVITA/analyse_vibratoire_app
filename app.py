@@ -603,5 +603,37 @@ if uploaded_file is not None:
         )
         
         st.plotly_chart(fig, config={'displayModeBar': True})
+   #Afficher l'autocorrelation   -----------------------------------------------------------
+   if st.checkbox("Afficher l'analyse d'autocorrélation"):
+    st.subheader("Analyse d'autocorrélation")
+    
+    # Calcul de l'autocorrélation normalisée
+    autocorr = np.correlate(amplitude, amplitude, mode='same')
+    autocorr = autocorr[len(autocorr)//2:]  # Troncature à la moitié
+    autocorr = autocorr / autocorr.max()     # Normalisation entre 0 et 1
+    
+    # Génération de l'échelle temporelle
+    t_autocorr = np.arange(len(autocorr)) / fs
+    
+    # Création du graphique
+    fig_autocorr = go.Figure()
+    fig_autocorr.add_trace(go.Scatter(
+        x=t_autocorr,
+        y=autocorr,
+        mode='lines',
+        name='Autocorrélation',
+        line=dict(width=1.5, color='#FF4B4B'),
+        hovertemplate='Décalage: %{x:.3f}s<br>Coeff: %{y:.3f}<extra></extra>'
+    ))
+    
+    # Paramètres d'affichage
+    fig_autocorr.update_layout(
+        title="Autocorrélation du signal (décalages positifs)",
+        xaxis_title="Décalage temporel (s)",
+        yaxis_title="Coefficient de corrélation",
+        hovermode='x unified',
+        height=400
+    )
+    st.plotly_chart(fig_autocorr)        # FIN AUTOCORRELATION
 else:
     st.info("Veuillez importer un fichier CSV pour commencer l'analyse.")

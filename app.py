@@ -634,6 +634,6 @@ if uploaded_file is not None:
               hovermode='x unified',
               height=400
           )
-    st.plotly_chart(fig_autocorr)        # FIN AUTOCORRELATION
+         st.plotly_chart(fig_autocorr)        # FIN AUTOCORRELATION
 else:
     st.info("Veuillez importer un fichier CSV pour commencer l'analyse.")

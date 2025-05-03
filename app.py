@@ -694,8 +694,7 @@ if uploaded_file is not None:
                    height=400
                )
                st.plotly_chart(fig2)
-
-        except Exception as e:
-            st.error(f"Erreur lors du calcul: {str(e)}") # FIN AUTOCORRELATION
+           except Exception as e:
+               st.error(f"Erreur lors du calcul: {str(e)}") # FIN AUTOCORRELATION
 else:
     st.info("Veuillez importer un fichier CSV pour commencer l'analyse.")

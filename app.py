@@ -657,7 +657,7 @@ if uploaded_file is not None:
                N_fft = len(A)
                if N_fft < 2:
                    st.warning("Signal trop court pour FFT")
-                    return
+                   return
                    
                X = fft(A, n=N_fft)
                freq = fftfreq(N_fft, 1/fs)[:N_fft//2]

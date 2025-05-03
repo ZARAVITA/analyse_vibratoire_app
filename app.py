@@ -639,7 +639,7 @@ if uploaded_file is not None:
                x=t_autocorr,
                y=A,
                mode='lines+markers',
-               line=dict(color='#FF6B6B', width=2),
+               line=dict(color='#FF6B6B', width=1),  #----------------------------------2 initial ce width
                marker=dict(size=5, color='#4B4453'),
                name='A(τ)'
            ))

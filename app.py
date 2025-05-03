@@ -644,7 +644,7 @@ if st.checkbox("Afficher l'analyse d'autocorrélation"):
                 y=A,
                 mode='lines',
                 line=dict(color='#1f77b4', width=2)
-            )
+            ))
             fig1.update_layout(
                 title="Autocorrélation normalisée",
                 xaxis_title="Décalage τ (s)",

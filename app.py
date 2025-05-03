@@ -630,36 +630,77 @@ if uploaded_file is not None:
              return A[:N//2 + 1]  # Ne garder que la moitié physique
 
 
+       
        with st.spinner('Calcul des coefficients...'):
-           A = calculate_proper_autocorrelation(amplitude)
-           t_autocorr = np.arange(len(A)) / fs
-           
-           fig = go.Figure()
-           fig.add_trace(go.Scatter(
-               x=t_autocorr,
-               y=A,
-               mode='lines+markers',
-               line=dict(color='#FF6B6B', width=1),  #----------------------------------2 initial ce width
-               marker=dict(size=5, color='#4B4453'),
-               name='A(τ)'
-           ))
-           
-           fig.update_layout(
-               title="Coefficient d'autocorrélation normalisé",
-               xaxis_title="Décalage temporel τ [s]",
-               yaxis_title="A(τ)",
-               yaxis_range=[-1.1, 1.1],  # Forcer l'échelle [-1, 1]
-               shapes=[{
-                   'type': 'line',
-                   'y0': 0,
-                   'y1': 0,
-                   'x0': 0,
-                   'x1': t_autocorr[-1],
-                   'line': {'color': 'gray', 'dash': 'dot'}
-               }],
-               height=500
-           )
-           
-           st.plotly_chart(fig)       # FIN AUTOCORRELATION
+            A = calculate_proper_autocorrelation(amplitude)
+            t_autocorr = np.arange(len(A)) / fs
+            
+            # Graphique d'autocorrélation style bleu
+            fig1 = go.Figure()
+            fig1.add_trace(go.Scatter(
+                x=t_autocorr,
+                y=A,
+                mode='lines',
+                line=dict(color='#1f77b4', width=2),  # Ligne bleue épaisse
+                name='A(τ)'
+            ))
+            
+            fig1.update_layout(
+                title="Coefficient d'autocorrélation",
+                xaxis_title="Décalage temporel τ [s]",
+                yaxis_title="Amplitude",
+                xaxis_range=[0, 0.2],  # Zoom sur la zone utile
+                hovermode="x unified",
+                height=400
+            )
+            st.plotly_chart(fig1)
+
+            # Calcul de la FFT de l'autocorrélation
+            st.subheader("FFT de l'autocorrélation")
+            N = len(A)
+            X = fft(A)
+            freq = fftfreq(N, 1/fs)[:N//2]
+            X_abs = np.abs(X[:N//2]) * 2.0/N
+
+            # Détection du pic principal
+            locX = np.argmax(X_abs)
+            peakX = X_abs[locX]
+            freqX = freq[locX]
+
+            # Graphique FFT style bleu
+            fig2 = go.Figure()
+            fig2.add_trace(go.Scatter(
+                x=freq,
+                y=X_abs,
+                mode='lines',
+                line=dict(color='#1f77b4', width=2),
+                name='Spectre'
+            ))
+            
+            fig2.add_trace(go.Scatter(
+                x=[freqX],
+                y=[peakX],
+                mode='markers',
+                marker=dict(color='#ff7f0e', size=10),
+                name=f'Pic à {freqX:.2f} Hz'
+            ))
+
+            fig2.update_layout(
+                title="FFT de l'autocorrélation",
+                xaxis_title="Fréquence (Hz)",
+                yaxis_title="Amplitude",
+                xaxis_range=[0, 0.4*fs],
+                annotations=[
+                    dict(
+                        x=freqX,
+                        y=peakX,
+                        text=f'{freqX:.2f} Hz',
+                        showarrow=True,
+                        arrowhead=1
+                    )
+                ],
+                height=400
+            )
+            st.plotly_chart(fig2)  # FIN AUTOCORRELATION
 else:
     st.info("Veuillez importer un fichier CSV pour commencer l'analyse.")

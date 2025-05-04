@@ -117,11 +117,11 @@ st.sidebar.write(f"- BPFI: {bpfi_freq:.2f} Hz")
 
 # Options d'affichage des fréquences
 st.sidebar.subheader("Options d'affichage")
-show_ftf = st.sidebar.checkbox("Afficher FTF", True)
-show_bsf = st.sidebar.checkbox("Afficher BSF", True)
-show_bpfo = st.sidebar.checkbox("Afficher BPFO", True)
-show_bpfi = st.sidebar.checkbox("Afficher BPFI", True)
-show_harmonics = st.sidebar.checkbox("Afficher les harmoniques", True)
+show_ftf = st.sidebar.checkbox("Afficher FTF", False)
+show_bsf = st.sidebar.checkbox("Afficher BSF", False)
+show_bpfo = st.sidebar.checkbox("Afficher BPFO", False)
+show_bpfi = st.sidebar.checkbox("Afficher BPFI", False)
+show_harmonics = st.sidebar.checkbox("Afficher les harmoniques", False)
 harmonics_count = st.sidebar.slider("Nombre d'harmoniques à afficher", 1, 5, 3) if show_harmonics else 0
 
 # Nouvelle option pour les harmoniques de vitesse
